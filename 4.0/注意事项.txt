@@ -1,0 +1,18 @@
+1.凡是英语单词没加“sth/sb/sp..."的，涉及到某某某的一律为"..."，中文一律用”...“表示
+2.加了的用某事某人表示（不排除早期没按这条规则走）
+3.目前有些输入带了空格，请仔细区分
+4.主程序目前没有更改意思功能，想改/输错了请直接编辑word.json。注意：改英文意思的同时别忘了改中文！
+5.前期的某些sb/sth加了”.“，请注意区分！（其实加点才是正确写法，但我懒a）
+word.json结构：
+--word_number
+	--Eng
+	--Chi
+--word_list:
+	--Eng
+		--English_word
+			--number_of_word
+			--Chinese_meaning_of_the_word
+	--Chi
+		--Chinese_meaning
+			--number_of_word
+			--English_word_of_the_meaning
