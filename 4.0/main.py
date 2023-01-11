@@ -24,12 +24,15 @@ node = {
     "number": 0
 }
 
+date = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
+
 
 def update():
     pass
 
 
 def _sort(word_dict_1, list_name):  # 用于开始新一轮的链表
+    print("Start to rebuild, the list name is:{}".format(list_name))
     cover_list = {}
     # word_list = {}
     eng_number = word_dict_1["word_number"]["Eng"]
@@ -48,6 +51,7 @@ def _sort(word_dict_1, list_name):  # 用于开始新一轮的链表
     with open("list/{}.json".format(list_name), "w") as j:
         json.dump(cover_list, j)
         j.close()
+    time.sleep(1.5)
 
 
 def _open(dict_name):
@@ -113,10 +117,10 @@ def add(opt, method, word_dict_1, string1, string2):
         word_dict_1["word_list"][option][string1][number] = string2
 
 
-def save_log(method, eng, chi):
+def save_log(method, eng, chi, dict_name):
     with open("log.log", "a") as l:
         date = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-        l.write("{}  {}  | {} | {} |\n".format(date, method, eng, chi))
+        l.write("{}  |{}.json|  {}  |  {}  |  {}  |\n".format(date, dict_name, method, eng, chi))
 
 
 def _input(method, word_dict_1, dict_name):
@@ -138,15 +142,19 @@ def _input(method, word_dict_1, dict_name):
             add(op, 1, word_dict_1, eng, chi)
             op = check(0, word_dict_1, chi, eng)
             add(op, 0, word_dict_1, chi, eng)
-            save_log("Input", eng, chi)
+            save_log("Input", eng, chi, dict_name)
 
 
-def _test(word_dict_1):
+def _test(word_dict_1, word_name):
     op_list = ["Chi", "Eng"]
     try:
         op = int(input("Please input which test you want,1 means Chi to Eng,2 means Eng to Chi：")) - 1
     except ValueError:
         print("Sorry, your input is wrong, I will auto to return to the main function")
+        return
+    if word_dict_1["word_number"]["Chi"] == 0 or word_dict_1["word_number"]["Eng"] == 0:
+        print("Your word list is empty!")
+        time.sleep(1.5)
         return
     option = op_list[op]
     q = queue.Queue()
@@ -155,6 +163,7 @@ def _test(word_dict_1):
         q.put(list(word_dict_1["word_list"][option].keys())[num])  # 取键操作
     while True:
         os.system("cls")
+        print("Now list:{}".format(word_name))
         print("Now let's start to test,you will randomly have a {} word and you should spell its {} CORRECTLY".format(
             op_list[op], op_list[-1 * op + 1]))
         print("You can input ‘ex’ to exit\n")
@@ -204,10 +213,16 @@ def new_test(cover_list, word_dict_1, list_name):  # 暂时仅限英语
         ....
     }
     """
+    if cover_list["number"] == 0:
+        print("Your word list is empty!")
+        time.sleep(1.5)
+        return
     test_string = cover_list["First_string"]  # 取最初字符串
     while cover_list["number"] != 0:
         os.system("cls")
         time.sleep(0.01)
+        print("Now list:{}".format(list_name))
+        print("If you find the list is wrong,please return to the menu and rebuild the list")
         print("当前剩余：" + str(cover_list["number"]))
         print("Let's test.You can input ‘ex’ to exit\n")
         user_string = input("{}：".format(test_string))
@@ -247,6 +262,7 @@ def new_test(cover_list, word_dict_1, list_name):  # 暂时仅限英语
             cover_list["First_string"] = test_string  # 更改头部字符串
             time.sleep(0.25)
     print("You AK IOI !")
+    time.sleep(3)
     return
 
 
@@ -289,6 +305,8 @@ def search(word_dict_1):
 
 def createList():
     name = input("Please input the name of the list:")
+    with open("list/{}.json".format(name), "w") as o:
+        o.close()
     _input(0, word_dict_standard, name)
 
 
@@ -321,21 +339,22 @@ def checkList():
         num += 1
     while True:
         try:
-            option = int(input("Please input the number of the folder you want to choose:"))
-            if json_list[option] + ".json" in json_list:
-                return option
+            option = int(input("Please input the number of the folder you want to choose:")) - 1
+            if json_list[option] in json_list:
+                return json_list[option].split('.')[0]
             else:
                 print("There is no such a list in your folder")
                 continue
         except:
             print("There are some errors! I will return default name 'word'")
+            time.sleep(2)
             return "word"
 
 
 # main函数入口
 def main():
     word_name = "word"
-    list_name = "list"
+    list_name = "word"
     try:
         print("Start to check")
         word_dict_1, ifDaoRu = _open(word_name)
@@ -346,49 +365,60 @@ def main():
             exit(1)
 
         else:
-            try:
-                with open("list.json", "r") as j:
-                    cover_list = json.load(j)
-                    j.close()
-            except:
-                _sort(word_dict_1, list_name)
-                with open("list.json", "r") as j:
-                    cover_list = json.load(j)
-                    j.close()
             while True:
+                os.system("cls")
+                print("Now word list: {}.json, now list: {}.json".format(word_name, list_name))
                 # 开机自检
                 word_dict_1, ifDaoRu = _open(word_name)
-                with open("list.json", "r") as j:
-                    cover_list = json.load(j)
-                    j.close()
-                os.system("cls")
                 try:
-                    op = int(input("Welcome to the English software, now please choose"
-                                   "\n1.input word.txt again.\n2.(recommended)Start to test by link list"
-                                   "\n3.attend words to word.txt\n4.change a "
-                                   "word\n5.found a word or a Chinese\n6.rebuild the list\n7.(not recommended)start "
-                                   "to test by random\n8.change the word list\n9.create a new word list\n10.exit:"))
+                    with open("list/{}.json".format(list_name), "r") as j:
+                        cover_list = json.load(j)
+                        j.close()
+                except Exception:
+                    print("Your test_list is empty! Auto to rebuild the list...")
+                    _sort(word_dict_1, list_name)
+                    time.sleep(2)
+                    continue
+                try:
+                    print("Welcome to the English software!")
+                    print("------------------------↓         This area is for test         ↓------------------------")
+                    print("1.(Recommended)Start to test by link list(Now is ordered)")
+                    print("2.(Not recommended)start to test by random")
+                    print("------------------------↓ This area is for find or change words ↓------------------------")
+                    print("3.Found a word or a Chinese.")
+                    print("4.change a word.")
+                    print("------------------------↓    This area is for list operations   ↓------------------------")
+                    print("5.Input your list again.")
+                    print("6.Attend words to your list.")
+                    print("7.Rebuild the list.")
+                    print("8.Change the word list(Pay attention, your test_list will be changed as well).")
+                    print("9.Create a new word list.")
+                    print("------------------------↓  This area is for software operation  ↓-----------------------")
+                    print("10.exit.")
+                    print("------------------------------------------------------------------------------------------")
+                    op = int(input("Now please choose:"))
                 except:
                     print("You print a WRONG word!")
                     continue
                 os.system('cls')
                 if op == 1:
+                    new_test(cover_list, word_dict_1, list_name)
+                elif op == 2:
+                    _test(word_dict_1, word_name)
+                elif op == 3:
+                    search(word_dict_1)
+                elif op == 4:
+                    print("The function is repairing...")
+                    input("Press enter to return...")
+                elif op == 5:
                     _input(0, word_dict_1, word_name)
                     print("OK")
                     time.sleep(1.5)
                     continue
-                elif op == 2:
-                    new_test(cover_list, word_dict_1, list_name)
-                elif op == 3:
-                    _input(1, word_dict_1, word_name)
-                elif op == 4:
-                    print("The function is repairing...")
-                elif op == 5:
-                    search(word_dict_1)
                 elif op == 6:
-                    _sort(word_dict_1, list_name)
+                    _input(1, word_dict_1, word_name)
                 elif op == 7:
-                    _test(word_dict_1)
+                    _sort(word_dict_1, list_name)
                 elif op == 8:
                     word_name = checkList()
                     list_name = word_name
@@ -396,7 +426,7 @@ def main():
                     createList()
                 elif op == 10:
                     print("start to save backup your document...")
-                    shutil.copyfile("word.json", "backup/word.json")
+                    shutil.copyfile("word/{}.json".format(word_name), "backup/{}-{}.json".format(date, word_name))
                     os.system("pause")
                     exit(1)
                 else:
