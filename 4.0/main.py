@@ -351,6 +351,37 @@ def checkList():
             return "word"
 
 
+def _print(dic):
+    knum = 1
+    for k, v in dic.items():
+        print(str(knum) + ":" + k)
+        knum += 1
+        num = 1
+        for i in dic[k]:
+            print("----" + str(num) + ":{}".format(i))
+            num += 1
+
+
+def lookUpdate():
+    try:
+        with open("update", 'r') as o:
+            dic = json.load(o)
+            o.close()
+        os.system("cls")
+        print("These are updates：")
+        _print(dic)
+        input("Press the enter key to return...")
+        return
+    except FileNotFoundError:
+        print("There is no update document,please communicate the administrator")
+        time.sleep(5)
+        return
+    except UnicodeDecodeError:
+        print("Your update document is broken!Please communicate the administrator")
+        time.sleep(5)
+        return
+
+
 # main函数入口
 def main():
     word_name = "word"
@@ -395,6 +426,7 @@ def main():
                     print("9.Create a new word list.")
                     print("------------------------↓  This area is for software operation  ↓-----------------------")
                     print("10.exit.")
+                    print("11.look update")
                     print("------------------------------------------------------------------------------------------")
                     op = int(input("Now please choose:"))
                 except:
@@ -429,6 +461,8 @@ def main():
                     shutil.copyfile("word/{}.json".format(word_name), "backup/{}-{}.json".format(date, word_name))
                     os.system("pause")
                     exit(1)
+                elif op == 11:
+                    lookUpdate()
                 else:
                     print("You input a wrong number!")
     except Exception as e:
